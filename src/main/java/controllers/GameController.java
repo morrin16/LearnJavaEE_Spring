@@ -1,5 +1,6 @@
-package lesson4;
+package controllers;
 
+import entity.Gameboard;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -8,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 
 @Controller
-@RequestMapping("gameboard.go")
+@RequestMapping("gameboard")
 public class GameController
 {
 
@@ -17,10 +18,10 @@ public class GameController
       @RequestParam(value = "wins", required = false, defaultValue = "0") int playerWins,
       @RequestParam(value = "losses", required = false, defaultValue = "0") int playerLosses)
     {
-        model.addAttribute("gameboard", new Gameboard("").asString());
+        model.addAttribute("gameboard", new Gameboard("").toString());
         model.addAttribute("wins", playerWins);
         model.addAttribute("losses", playerLosses);
-        return "gameboard.jsp";
+        return "gameboard";
     }
 
 
@@ -31,11 +32,13 @@ public class GameController
       @RequestParam("row") int row, @RequestParam("col") int col)
     {
         if (gameover)
+        {
             return requestGet(model, playerWins, playerLosses);
+        }
 
         Gameboard gb = new Gameboard(gameboard);
 
-        gb.doMove(new Gameboard.Position(row, col), 'X');
+        gb.makeMove(new Gameboard.Position(row, col), 'X');
         gameover = gb.isVictoryState();
 
         if (gameover)
@@ -44,11 +47,13 @@ public class GameController
             model.addAttribute("alertMessage", "You win!");
         }
         else
+        {
             gameover = gb.isDrawState();
+        }
 
         if (!gameover)
         {
-            gb.doMove(gb.getRandomEmptyPosition(), '0');
+            gb.makeMove(gb.getRandomEmptyPosition(), '0');
             gameover = gb.isVictoryState();
 
             if (gameover)
@@ -57,18 +62,22 @@ public class GameController
                 model.addAttribute("alertMessage", "You loss!");
             }
             else
+            {
                 gameover = gb.isDrawState();
+            }
         }
 
-        model.addAttribute("gameboard", gb.asString());
+        model.addAttribute("gameboard", gb.toString());
         model.addAttribute("wins", playerWins);
         model.addAttribute("losses", playerLosses);
         model.addAttribute("gameover", gameover);
 
         if (gameover && !model.containsAttribute("alertMessage"))
+        {
             model.addAttribute("alertMessage", "It is draw!");
+        }
 
-        return "gameboard.jsp";
+        return "gameboard";
     }
 
 } //GameController
